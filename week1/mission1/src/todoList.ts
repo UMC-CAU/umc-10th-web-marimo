@@ -1,6 +1,6 @@
-const input = document.getElementById("input");
-const todoList = document.getElementById("todo-list");
-const doneList = document.getElementById("done-list");
+const input = document.getElementById("input") as HTMLInputElement;
+const todoList = document.getElementById("todo-list") as HTMLUListElement; 
+const doneList = document.getElementById("done-list") as HTMLUListElement;
 
 
 
@@ -22,20 +22,27 @@ input.addEventListener("keydown", function(event) {
 });    
 
 todoList.addEventListener("click", function(event) {
-    if (event.target.tagName === "BUTTON" && event.target.textContent === "완료") {
-        const li = event.target.parentElement;
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "삭제";
-        li.append(deleteButton);
-        doneList.appendChild(li);
-        event.target.remove();
+    const target = event.target as HTMLElement;
+
+    if (target.tagName === "BUTTON" && target.textContent === "완료") {
+        const li = target.parentElement;
+        if(li){
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "삭제";
+            li.append(deleteButton);
+            doneList.appendChild(li);
+            target.remove();
+        }
     }
 });
 
 
 doneList.addEventListener("click", function(event){
-    if (event.target.tagName === "BUTTON" && event.target.textContent === "삭제") {
-        const li = event.target.parentElement;
-        li.remove();
+    const target = event.target as HTMLElement;
+    if (target.tagName === "BUTTON" && target.textContent === "삭제") {
+        const li = target.parentElement;
+        if(li){
+            li.remove();
+        }
     }
 })
