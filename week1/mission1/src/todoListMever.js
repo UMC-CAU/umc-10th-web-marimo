@@ -5,6 +5,22 @@ var todoListt = document.getElementById('todo-list');
 var doneListt = document.getElementById('done-list');
 var todos = [];
 var doneTasks = [];
+// 새로고침 시 초기화 문제 해결
+var saveTasks = function () {
+    localStorage.setItem('todos', JSON.stringify(todos));
+    localStorage.setItem('doneTasks', JSON.stringify(doneTasks));
+};
+// localStrage에서 데이터 불러오기
+var loadTasks = function () {
+    var savedTodos = localStorage.getItem('todos');
+    var savedDoneTasks = localStorage.getItem('doneTasks');
+    if (savedTodos) {
+        todos = JSON.parse(savedTodos);
+    }
+    if (savedDoneTasks) {
+        doneTasks = JSON.parse(savedDoneTasks);
+    }
+};
 //- 할 일 목록 렌더링 하는 함수를 정의
 var renderTasks = function () {
     todoListt.innerHTML = '';
@@ -26,17 +42,20 @@ var getTodoText = function () {
 var addTodo = function (text) {
     todos.push({ id: Date.now(), text: text });
     todoInput.value = '';
+    saveTasks();
     renderTasks();
 };
 //5. 할 일 상태 변경 (완료로 이동)
 var completeTodo = function (todo) {
     todos = todos.filter(function (t) { return t.id !== todo.id; });
     doneTasks.push(todo);
+    saveTasks();
     renderTasks();
 };
 //6. 완료된 할 일 삭제 함수
 var deleteTodo = function (todo) {
     doneTasks = doneTasks.filter(function (t) { return t.id !== todo.id; });
+    saveTasks();
     renderTasks();
 };
 //7. 할 일 아이템 생성 함수 (완료 여부에 따라 버튼 텍스트나 생상 설정)
@@ -73,4 +92,5 @@ todoForm.addEventListener('submit', function (event) {
         addTodo(text);
     }
 });
+loadTasks();
 renderTasks();

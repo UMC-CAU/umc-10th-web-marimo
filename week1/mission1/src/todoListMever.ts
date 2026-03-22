@@ -12,6 +12,27 @@ type Todo = {
 
 let todos: Todo[] = [];
 let doneTasks: Todo[] = [];
+
+// 새로고침 시 초기화 문제 해결
+const saveTasks = (): void => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+    localStorage.setItem('doneTasks', JSON.stringify(doneTasks));
+}
+
+// localStrage에서 데이터 불러오기
+const loadTasks = (): void => {
+    const savedTodos = localStorage.getItem('todos');
+    const savedDoneTasks = localStorage.getItem('doneTasks');
+
+    if (savedTodos) {
+        todos = JSON.parse(savedTodos);
+    }
+    if (savedDoneTasks) {
+        doneTasks = JSON.parse(savedDoneTasks);
+    }
+};
+
+
 //- 할 일 목록 렌더링 하는 함수를 정의
 const renderTasks = () => {
     todoListt.innerHTML = '';
@@ -38,6 +59,7 @@ const getTodoText = (): string => {
 const addTodo = (text: string) : void => {
     todos.push({ id: Date.now(), text });
     todoInput.value = '';
+    saveTasks();
     renderTasks();
 }
 
@@ -45,12 +67,14 @@ const addTodo = (text: string) : void => {
 const completeTodo = (todo: Todo) : void => {
     todos = todos.filter((t): boolean => t.id !== todo.id);
     doneTasks.push(todo);
+    saveTasks();
     renderTasks();
 };
 
 //6. 완료된 할 일 삭제 함수
 const deleteTodo = (todo: Todo) : void => {
     doneTasks = doneTasks.filter((t) : boolean => t.id !== todo.id);
+    saveTasks();
     renderTasks();
 };
 //7. 할 일 아이템 생성 함수 (완료 여부에 따라 버튼 텍스트나 생상 설정)
@@ -90,4 +114,5 @@ todoForm.addEventListener('submit', (event) => {
     }
 });
 
+loadTasks();
 renderTasks();
