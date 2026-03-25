@@ -1,13 +1,26 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
+
+interface Todo{
+  id: number;
+  text: string;
+  done: boolean;
+}
 
 function App() {
 
   // 예시: 투두 데이터가 객체 배열 형태로 State에 들어있다고 가정합니다.
-  const [todo, todoAdd] = useState([
-    { id: 1, text: "할 일 1", done: false },
-    { id: 2, text: "할 일 2", done: false }
-  ]);
+  const [todo, todoAdd] = useState<Todo[]>((() => {
+    const savedTodos = localStorage.getItem('todos');
+    if (savedTodos) {
+      return JSON.parse(savedTodos);
+    }
+    return [];
+  }));
+
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todo));
+  }, [todo]);
 
   const [inputText, setInputText] = useState("");
 
@@ -28,6 +41,22 @@ function App() {
     setInputText("");
 
   }
+
+  const toggleDone = (id: number) => {
+    const updateTodo = todo.map((item) => {
+      if(item.id === id){
+        return{...item, done: !item.done};
+      }
+      return item;
+    });
+    todoAdd(updateTodo);
+  };
+
+  const deleteTodo = (id: number) => {
+    const remainTodo = todo.filter((item) => item.id !== id);
+    todoAdd(remainTodo);
+  };
+
 
   return (
     <>
@@ -51,17 +80,28 @@ function App() {
                 <div className="render-container__section">
                     <h2 className="render-container__title">할 일</h2>
                     <ul id="todo-list" className="render-container__list">
-                      {todo.map((todo) => (
+                      {todo
+                      .filter((item) => item.done === false)
+                      .map((todo) => (
                         <li key ={todo.id}>
                           <span>{todo.text}</span>
-                          <button>완료</button>
+                          <button onClick={() => toggleDone(todo.id)}>완료</button>
                         </li>
                       ))}
                     </ul>
                 </div>
                 <div className="render-container__section">
                     <h2 className="render-container__title">완료</h2>
-                    <ul id="done-list" className="render-container__list"></ul>
+                    <ul id="done-list" className="render-container__list">
+                      {todo
+                        .filter((item) => item.done === true)
+                        .map((todo) => (
+                          <li key ={todo.id}>
+                            <span>{todo.text}</span>
+                            <button onClick={() => deleteTodo(todo.id)}>삭제</button>
+                          </li>
+                        ))}
+                    </ul>
                 </div>
             </div>
         </div>
