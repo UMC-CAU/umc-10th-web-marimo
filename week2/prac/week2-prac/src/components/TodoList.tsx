@@ -10,20 +10,19 @@ interface ITodoListProps {
 
 const TodoList = ({ title, todos, buttonLabel, buttonColor, onClick }: ITodoListProps) => {
     return (
-        <div className='render-container__section'>
-            <h2 className='render-container__title'>{title}</h2>
-            <ul id='todo-list'
-            className='render-container__list'>
+        // 기존 클래스 유지 + 다크모드 섹션 배경색
+        <div className='render-container__section dark:bg-[#2a2a2a]'>
+            <h2 className='render-container__title dark:text-white'>{title}</h2>
+            <ul id='todo-list' className='render-container__list'>
                 {todos.map((todo) => (
-                    <li key={todo.id}
-                    className='render-container__item'>
-                        <span className='render-container__item-text'>
-                            {todo.text}</span>
-                            <button
+                    // 기존 클래스 유지 + 다크모드 아이템 배경색 및 테두리
+                    <li key={todo.id} className='render-container__item dark:bg-[#333] dark:border-gray-600'>
+                        <span className='render-container__item-text dark:text-white'>
+                            {todo.text}
+                        </span>
+                        <button
                             onClick={() => onClick(todo)}
-                            style={{
-                                backgroundColor: buttonColor,
-                            }}
+                            style={{ backgroundColor: buttonColor }}
                             className='render-container__item-button'
                         >
                             {buttonLabel}
