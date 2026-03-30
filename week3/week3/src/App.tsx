@@ -1,35 +1,21 @@
 import './App.css'
-import { Link, Routes} from './Router';
-import { Route } from './Route';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-const MarimoPage = () => <h1>Marimo Page</h1>;
-const AramPage = () => <h1>Aram Page</h1>;
-const PePage = () => <h1>Pe Page</h1>;
-const NotFoundPage = () => <h1>Not Found Page</h1>;
-
-const Header = () => {
-  return (
-    <nav style={{display: 'flex', gap: '10px'}}>
-      <Link to="/marimo">Marimo</Link>
-      <Link to="/aram">Aram</Link>
-      <Link to="/pe">Pe</Link>
-      <Link to="/not-found">Not Found</Link>
-    </nav>
-  );
-};
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <h1>홈 페이지입니다.</h1>,
+    // 매칭 실패/라우트 에러 시 보여줄 UI
+    errorElement: <h1>너는 없는 경로에 들어왔다 ^ㅁ^ 야호~!</h1>,
+  },
+  {
+    path: '/movies',
+    element: <h1>영화 페이지 입니다.</h1>,
+  },
+]);
 
 function App() {
-  return (
-    <>
-      <Header />
-      <Routes>
-        <Route path="/marimo" component={MarimoPage} />
-        <Route path="/aram" component={AramPage} />
-        <Route path="/pe" component={PePage} />
-        <Route path="*" component={NotFoundPage} />
-      </Routes>
-    </>
-  ); 
-};
+  return <RouterProvider router={router} />;
+}
 
-export default App
+export default App;
