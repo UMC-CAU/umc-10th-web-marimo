@@ -26,10 +26,16 @@ const MoviesPage = () => {
   }, []);
   
   return (
-    <ul>
+    <ul className="movie-grid">
       {movies?.map((movie) => (
-        <li key={movie.id} style={{ listStyle: 'none' }}>
-          <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title}/>
+        <li key={movie.id} className="movie-card">
+          <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} className="movie-poster" alt={movie.title}/>
+          <div className="inner-content">
+            <span className="title">{movie.title}</span>
+            <span className="overview">
+              {movie.overview}
+            </span>
+          </div>
         </li>
       ))}
     </ul>

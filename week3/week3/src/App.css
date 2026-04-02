@@ -1,0 +1,45 @@
+.movie-grid{
+    display: grid;
+    grid-template-columns: repeat(6, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    margin: 0px;
+}
+
+.movie-card{
+    list-style: none;
+    position: relative;
+}
+
+.movie-poster{
+  width: 100%; 
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.movie-card:hover .movie-poster {
+    transform: scale(1.05);
+    filter: blur(3px) brightness(0.5); 
+}
+
+.movie-poster:hover{
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+    filter: blur(2px);
+}
+
+.movie-card .inner-content{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.movie-card:hover .inner-content {
+    opacity: 1;
+}
