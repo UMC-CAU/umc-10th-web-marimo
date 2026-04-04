@@ -5,6 +5,9 @@ import HomePage from './pages/home';
 import Movies from './pages/movies';
 import NotFound from './pages/not-found';
 import RootLayout from './layout/root-layout';
+import NowPlayingMoviesPage from './pages/showing_mov';
+import UpcomingMoviesPage from './pages/soon_mov';
+import TopRatedMoviesPage from './pages/estimation_mov';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +27,18 @@ const router = createBrowserRouter([
       {
         path: 'movies/:movieId',
         element: <Movies />
+      },
+      {
+        path: 'showing',
+        element: <NowPlayingMoviesPage />
+      },
+      {
+        path: 'soon',
+        element: <UpcomingMoviesPage />
+      },
+      {
+        path: 'top-rated',
+        element: <TopRatedMoviesPage />
       },
     ],
   },
