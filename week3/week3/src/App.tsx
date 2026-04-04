@@ -10,6 +10,7 @@ import RootLayout from './layout/root-layout';
 import NowPlayingMoviesPage from './pages/showing_mov';
 import UpcomingMoviesPage from './pages/soon_mov';
 import TopRatedMoviesPage from './pages/estimation_mov';
+import MovieDetailPage from './pages/movie-detail';
 
 const router = createBrowserRouter([
   {
@@ -28,7 +29,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'movies/:movieId',
-        element: <Movies />
+        element: <MovieDetailPage />
       },
       {
         path: 'showing',
