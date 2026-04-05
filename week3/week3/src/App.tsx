@@ -57,7 +57,7 @@ function App() {
         method: 'GET',
         headers: {
           Accept: 'application/json',
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlYWM5MzI3YjFlODg3ZmJmZDRkOWZkOTdkNWYwNDhmNCIsIm5iZiI6MTc3NDg2Mzk0NC44NzgsInN1YiI6IjY5Y2E0NjQ4N2ZlNWE0NjI5NzFlY2U4MCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.lUy95AcWLdz_E8WOV6LPrmR9IwqsiZlClH12wZwLzX8',
+          Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
         },
       });
       const result = await response.json();
