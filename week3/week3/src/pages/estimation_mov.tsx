@@ -3,7 +3,7 @@ import {type Movie, type MovieResponse} from '../types/movie';
 import axios from 'axios';
 import PageButton from '../components/pageButton';
 
-const MoviesPage = () => {
+const TopRatedMoviesPage = () => {
   const [movies, setMovies] =useState<Movie[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -13,10 +13,11 @@ const MoviesPage = () => {
     const fetchMovies = async () => {
       try {
         const {data} = await axios.get<MovieResponse>(
-          `https://api.themoviedb.org/3/movie/popular?language=en-US&page=${page}`,
+          `https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=${page}&sort_by=vote_average.desc&without_genres=99,10755&vote_count.gte=200`,
           {
             headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`            },
+              Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
+            },
           }
         );
         setMovies(data.results);
@@ -74,5 +75,5 @@ const MoviesPage = () => {
   );
 };
 
-export default MoviesPage;
+export default TopRatedMoviesPage;
 

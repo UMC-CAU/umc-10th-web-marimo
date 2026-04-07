@@ -3,7 +3,7 @@ import {type Movie, type MovieResponse} from '../types/movie';
 import axios from 'axios';
 import PageButton from '../components/pageButton';
 
-const MoviesPage = () => {
+const NowPlayingMoviesPage = () => {
   const [movies, setMovies] =useState<Movie[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -13,10 +13,11 @@ const MoviesPage = () => {
     const fetchMovies = async () => {
       try {
         const {data} = await axios.get<MovieResponse>(
-          `https://api.themoviedb.org/3/movie/popular?language=en-US&page=${page}`,
+          `https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=${page}`,
           {
             headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`            },
+              Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
+            },
           }
         );
         setMovies(data.results);
@@ -74,5 +75,5 @@ const MoviesPage = () => {
   );
 };
 
-export default MoviesPage;
+export default NowPlayingMoviesPage;
 

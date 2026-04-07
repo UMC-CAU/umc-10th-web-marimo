@@ -1,11 +1,69 @@
-// src/components/navbar.tsx
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
   return (
     <nav>
-      <Link to="/">홈 페이지로 이동 </Link>
-      <Link to="/movies">영화 목록 페이지로 이동</Link>
+      <NavLink
+        to="/"
+        className= {({isActive})=>
+          `mr-4
+          ${isActive
+          ? "text-green-400"
+          : "text-gray-500 hover:text-blue-700"
+          }`
+        }
+        >
+        홈
+      </NavLink>
+      <NavLink
+        to="/movies"
+        className = {({isActive})=>
+          `mr-4
+          ${isActive
+          ? "text-green-400"
+          : "text-gray-500 hover:text-blue-700"
+          }`
+        }
+        >
+        인기 영화
+      </NavLink>
+      <NavLink
+        to="/showing"
+        className = {({isActive})=>
+          `mr-4
+          ${isActive
+          ? "text-green-400"
+          : "text-gray-500 hover:text-blue-700"
+          }`
+        }
+        >
+        상영 중
+      </NavLink>
+      <NavLink
+        to="/top-rated"
+        className = {({isActive})=>
+          `mr-4
+          ${isActive
+          ? "text-green-400"
+          : "text-gray-500 hover:text-blue-700"
+          }`
+        }
+        >
+        평점 높은
+      </NavLink>
+      <NavLink
+        to="/soon"
+        className = {({isActive})=>
+          `mr-4
+          ${isActive
+          ? "text-green-400"
+          : "text-gray-500 hover:text-blue-700"
+          }`
+        }
+        >
+        개봉 예정
+      </NavLink>
+
     </nav>
   );
 };
