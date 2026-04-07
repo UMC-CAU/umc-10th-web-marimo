@@ -1,12 +1,11 @@
 import { useState, useContext } from 'react';
 import { TodoContext } from '../context/todoContext';
 
-// 부모로부터 props를 받을 필요가 없음
 const TodoForm = () => {
     const [input, setInput] = useState<string>('');
     const context = useContext(TodoContext);
 
-    if (!context) return null; // 타입스크립트 에러 방지
+    if (!context) return null;
     const { addTodo } = context;
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,7 +23,8 @@ const TodoForm = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 type='text'
-                className='todo-container__input'
+                // 기존 클래스 유지 + 다크모드 색상 추가
+                className='todo-container__input dark:bg-gray-700 dark:text-white dark:border-gray-600'
                 placeholder='할 일 입력'
                 required
             />
