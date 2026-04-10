@@ -6,3 +6,4 @@ export const apiClient = axios.create({
     Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
   },
 });
+
