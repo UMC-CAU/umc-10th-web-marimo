@@ -11,6 +11,7 @@ import NowPlayingMoviesPage from './pages/showing_mov';
 import UpcomingMoviesPage from './pages/soon_mov';
 import TopRatedMoviesPage from './pages/estimation_mov';
 import MovieDetailPage from './pages/movie-detail';
+import LoginPage from './pages/login';
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: 'login',
+        element: <LoginPage />,
       },
       {
         path: 'movies',
