@@ -12,6 +12,7 @@ import UpcomingMoviesPage from './pages/soon_mov';
 import TopRatedMoviesPage from './pages/estimation_mov';
 import MovieDetailPage from './pages/movie-detail';
 import LoginPage from './pages/login';
+import SignupPage from './pages/signup';
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: 'login',
         element: <LoginPage />,
+      },
+      {
+        path: 'signup',
+        element: <SignupPage />,
       },
       {
         path: 'movies',
