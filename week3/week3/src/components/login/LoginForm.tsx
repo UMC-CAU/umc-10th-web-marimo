@@ -1,34 +1,20 @@
+import { Controller, type Control } from 'react-hook-form';
 import LoginField from './LoginField';
-
-type LoginFormValues = {
-  email: string;
-  password: string;
-};
+import type { LoginFormValues } from '../../types/auth';
 
 type LoginFormProps = {
-  values: LoginFormValues;
-  errors: Partial<Record<keyof LoginFormValues, string>>;
-  touched: Partial<Record<keyof LoginFormValues, boolean>>;
+  control: Control<LoginFormValues>;
   isValid: boolean;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   onBack: () => void;
 };
 
 const LoginForm = ({
-  values,
-  errors,
-  touched,
+  control,
   isValid,
-  onChange,
-  onBlur,
   onSubmit,
   onBack,
 }: LoginFormProps) => {
-  const shouldShowEmailError = Boolean(touched.email || values.email.length > 0);
-  const shouldShowPasswordError = Boolean(touched.password || values.password.length > 0);
-
   return (
     <div className="relative w-full max-w-md rounded-[2rem] border border-white/10 bg-white/10 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
       <button
@@ -49,30 +35,42 @@ const LoginForm = ({
       </div>
 
       <form className="mt-8 space-y-5" onSubmit={onSubmit} noValidate>
-        <LoginField
-          label="이메일"
+        <Controller
           name="email"
-          type="email"
-          value={values.email}
-          placeholder="name@example.com"
-          autoComplete="email"
-          error={errors.email}
-          showError={shouldShowEmailError}
-          onChange={onChange}
-          onBlur={onBlur}
+          control={control}
+          render={({ field, fieldState }) => (
+            <LoginField
+              label="이메일"
+              name={field.name}
+              type="email"
+              value={field.value ?? ''}
+              placeholder="name@example.com"
+              autoComplete="email"
+              error={fieldState.error?.message}
+              showError={Boolean(fieldState.error)}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+            />
+          )}
         />
 
-        <LoginField
-          label="비밀번호"
+        <Controller
           name="password"
-          type="password"
-          value={values.password}
-          placeholder="비밀번호를 입력하세요"
-          autoComplete="current-password"
-          error={errors.password}
-          showError={shouldShowPasswordError}
-          onChange={onChange}
-          onBlur={onBlur}
+          control={control}
+          render={({ field, fieldState }) => (
+            <LoginField
+              label="비밀번호"
+              name={field.name}
+              type="password"
+              value={field.value ?? ''}
+              placeholder="비밀번호를 입력하세요"
+              autoComplete="current-password"
+              error={fieldState.error?.message}
+              showError={Boolean(fieldState.error)}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+            />
+          )}
         />
 
         <button

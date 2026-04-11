@@ -1,54 +1,38 @@
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import LoginForm from '../components/login/LoginForm';
-import { useForm } from '../hooks/useForm';
-
-type LoginFormValues = {
-  email: string;
-  password: string;
-};
-
-const initialValues: LoginFormValues = {
-  email: '',
-  password: '',
-};
-
-const validateLoginForm = (values: LoginFormValues) => {
-  const errors: Partial<Record<keyof LoginFormValues, string>> = {};
-
-  if (!/^\S+@\S+\.\S+$/.test(values.email)) {
-    errors.email = '유효하지 않은 이메일 형식입니다.';
-  }
-
-  if (values.password.length < 6) {
-    errors.password = '비밀번호는 최소 6자 이상이어야 합니다.';
-  }
-
-  return errors;
-};
+import { loginSchema } from '../schemas/auth';
+import type { AuthSession, LoginFormValues } from '../types/auth';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [, setAuthSession] = useLocalStorage<AuthSession | null>('authSession', null);
+
   const {
-    values,
-    errors,
-    touched,
-    isValid,
-    handleChange,
-    handleBlur,
-    markAllTouched,
-  } = useForm(initialValues, validateLoginForm);
+    control,
+    handleSubmit,
+    formState: { isValid },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    markAllTouched();
-
-    if (!isValid) {
-      return;
-    }
+  const onSubmit = (values: LoginFormValues) => {
+    setAuthSession({
+      email: values.email,
+      nickname: values.email.split('@')[0],
+      token: `mock-token-${Date.now()}`,
+    });
 
     navigate('/');
   };
@@ -57,13 +41,9 @@ const LoginPage = () => {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#1e293b,_#020617_50%)] px-4 py-10 text-slate-100">
       <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl items-center justify-center">
         <LoginForm
-          values={values}
-          errors={errors}
-          touched={touched}
+          control={control}
           isValid={isValid}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           onBack={handleBack}
         />
       </section>
