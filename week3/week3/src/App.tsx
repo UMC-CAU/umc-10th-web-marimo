@@ -13,6 +13,7 @@ import TopRatedMoviesPage from './pages/estimation_mov';
 import MovieDetailPage from './pages/movie-detail';
 import LoginPage from './pages/login';
 import SignupPage from './pages/signup';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
@@ -21,38 +22,43 @@ const router = createBrowserRouter([
     errorElement: <NotFound />,
 
     children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: 'login',
-        element: <LoginPage />,
-      },
-      {
-        path: 'signup',
-        element: <SignupPage />,
-      },
-      {
-        path: 'movies',
-        element: <Movies />
-      },
-      {
-        path: 'movies/:movieId',
-        element: <MovieDetailPage />
-      },
-      {
-        path: 'showing',
-        element: <NowPlayingMoviesPage />
-      },
-      {
-        path: 'soon',
-        element: <UpcomingMoviesPage />
-      },
-      {
-        path: 'top-rated',
-        element: <TopRatedMoviesPage />
-      },
+        {
+          index: true,
+          element: <HomePage />,
+        },
+        {
+          path: 'login',
+          element: <LoginPage />,
+        },
+        {
+          path: 'signup',
+          element: <SignupPage />,
+        },
+          {
+            element: <ProtectedRoute />, 
+            children: [
+          {  
+            path: 'movies',
+            element: <Movies />
+          },
+          {
+            path: 'movies/:movieId',
+            element: <MovieDetailPage />
+          },
+          {
+            path: 'showing',
+            element: <NowPlayingMoviesPage />
+          },
+          {
+            path: 'soon',
+            element: <UpcomingMoviesPage />
+          },
+          {
+            path: 'top-rated',
+            element: <TopRatedMoviesPage />
+          },
+        ]
+      }
     ],
   },
 ]);
