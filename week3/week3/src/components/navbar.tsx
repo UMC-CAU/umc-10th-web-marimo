@@ -64,6 +64,33 @@ const Navbar = () => {
         개봉 예정
       </NavLink>
 
+      <nav className="position absolute right-6">  
+        <NavLink
+          to="/login"
+          className = {({isActive})=>
+            `mr-4
+            ${isActive
+            ? "text-pink-400"
+            : "text-white hover:text-pink-400"
+            }`
+          }
+         >
+          로그인
+        </NavLink>
+        <NavLink
+          to="/signup"
+          className = {({isActive})=>
+            `mr-4
+            ${isActive
+            ? "text-white-400"
+            : "text-pink-400 hover:text-white"
+            }`
+          }
+         >
+          회원가입
+        </NavLink>
+      </nav>
+
     </nav>
   );
 };
