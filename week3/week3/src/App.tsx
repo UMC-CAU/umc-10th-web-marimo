@@ -1,5 +1,5 @@
 import './App.css';
-import {createBrowserRouter, RouterProvider} from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import React, { useEffect } from 'react';
 import Loading from './components/Loading';
 
@@ -13,13 +13,14 @@ import TopRatedMoviesPage from './pages/estimation_mov';
 import MovieDetailPage from './pages/movie-detail';
 import LoginPage from './pages/login';
 import SignupPage from './pages/signup';
+import ProtectedRoute from './components/ProtectedRoute';
+import OAuthCallbackPage from './pages/oauth-callback';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <RootLayout />,
     errorElement: <NotFound />,
-
     children: [
       {
         index: true,
@@ -34,24 +35,34 @@ const router = createBrowserRouter([
         element: <SignupPage />,
       },
       {
-        path: 'movies',
-        element: <Movies />
+        path: 'v1/auth/google/callback',
+        element: <OAuthCallbackPage />,
       },
+      
       {
-        path: 'movies/:movieId',
-        element: <MovieDetailPage />
-      },
-      {
-        path: 'showing',
-        element: <NowPlayingMoviesPage />
-      },
-      {
-        path: 'soon',
-        element: <UpcomingMoviesPage />
-      },
-      {
-        path: 'top-rated',
-        element: <TopRatedMoviesPage />
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: 'movies',
+            element: <Movies />
+          },
+          {
+            path: 'movies/:movieId',
+            element: <MovieDetailPage />
+          },
+          {
+            path: 'showing',
+            element: <NowPlayingMoviesPage />
+          },
+          {
+            path: 'soon',
+            element: <UpcomingMoviesPage />
+          },
+          {
+            path: 'top-rated',
+            element: <TopRatedMoviesPage />
+          },
+        ],
       },
     ],
   },
@@ -61,21 +72,10 @@ function App() {
   const [loading, setLoading] = React.useState(true);
 
   const handleLoading = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('https://api.themoviedb.org/3/movie/popular?language=en-US&page=1', {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
-        },
-      });
-      const result = await response.json();
-      console.log('mainData', result);
+  
+    setTimeout(() => {
       setLoading(false);
-    } catch (error){
-      window.alert(error);
-    }
+    }, 500);
   };
 
   useEffect(() => {
@@ -87,7 +87,6 @@ function App() {
   }
 
   return <RouterProvider router={router} />;
-};
-
+}
 
 export default App;
