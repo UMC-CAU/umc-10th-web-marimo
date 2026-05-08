@@ -1,0 +1,60 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.layout-container {
+  display: flex;
+  flex: 1;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem 1.5rem;
+  background-color: #fafafa;
+}
+
+.floating-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  transition: all 0.3s;
+  z-index: 50;
+
+  &:hover {
+    background-color: #2980b9;
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .floating-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+}
