@@ -11,50 +11,31 @@
 
 .main-content {
   flex: 1;
-  padding: 2rem 1.5rem;
-  background-color: #fafafa;
+  min-width: 0;
+  background: var(--bg);
+  padding: 1.5rem;
 }
 
 .floating-btn {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background-color: #3498db;
-  color: white;
+  background: var(--accent);
+  color: #fff;
   border: none;
-  font-size: 2rem;
-  cursor: pointer;
+  font-size: 1.6rem;
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-  transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(255, 59, 107, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
   z-index: 50;
-
-  &:hover {
-    background-color: #2980b9;
-    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
-    transform: scale(1.1);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
 }
-
-@media (max-width: 768px) {
-  .main-content {
-    padding: 1.5rem 1rem;
-  }
-
-  .floating-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-    bottom: 1.5rem;
-    right: 1.5rem;
-  }
+.floating-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(255, 59, 107, 0.5);
 }

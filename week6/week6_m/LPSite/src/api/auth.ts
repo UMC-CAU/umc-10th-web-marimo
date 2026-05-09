@@ -1,19 +1,15 @@
 import { apiClient } from './client';
-import { type AuthResponse, type LoginRequest, type SignupRequest } from '../types';
+import { type SignInData, type SignUpData, type LoginRequest, type SignupRequest } from '../types';
 
-export const login = async (payload: LoginRequest): Promise<AuthResponse> => {
-  const { data } = await apiClient.post('/auth/login', payload);
-  // 토큰 저장
-  localStorage.setItem('access_token', data.access_token);
-  localStorage.setItem('user', JSON.stringify(data.user));
+export const login = async (payload: LoginRequest): Promise<SignInData> => {
+  const { data } = await apiClient.post<SignInData>('/v1/auth/signin', payload);
+  localStorage.setItem('access_token', data.accessToken);
+  localStorage.setItem('user', JSON.stringify({ id: data.id, name: data.name }));
   return data;
 };
 
-export const signup = async (payload: SignupRequest): Promise<AuthResponse> => {
-  const { data } = await apiClient.post('/auth/signup', payload);
-  // 토큰 저장
-  localStorage.setItem('access_token', data.access_token);
-  localStorage.setItem('user', JSON.stringify(data.user));
+export const signup = async (payload: SignupRequest): Promise<SignUpData> => {
+  const { data } = await apiClient.post<SignUpData>('/v1/auth/signup', payload);
   return data;
 };
 

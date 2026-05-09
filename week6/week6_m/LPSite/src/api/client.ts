@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -9,7 +9,6 @@ export const apiClient = axios.create({
   },
 });
 
-// 요청 인터셉터 - 토큰 추가
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
@@ -21,12 +20,16 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 응답 인터셉터 - 토큰 만료 처리
+// 백엔드 { status, statusCode, message, data } 래퍼 자동 해제
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data && 'data' in response.data) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
-      // 토큰 만료 시 처리
       localStorage.removeItem('access_token');
       localStorage.removeItem('user');
       window.location.href = '/login';

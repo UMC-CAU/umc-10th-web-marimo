@@ -13,8 +13,6 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        
-        {/* Layout이 적용되는 페이지들 */}
         <Route
           path="/"
           element={
@@ -31,8 +29,6 @@ function App() {
             </Layout>
           }
         />
-        
-        {/* 404 페이지 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

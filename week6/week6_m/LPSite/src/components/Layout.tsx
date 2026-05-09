@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import './Layout.css';
@@ -8,17 +8,19 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="layout">
-      <Header />
+      <Header onMenuClick={() => setSidebarOpen(o => !o)} />
       <div className="layout-container">
-        <Sidebar />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <main className="main-content">
           {children}
         </main>
       </div>
       <button className="floating-btn" onClick={() => window.location.href = '/create'}>
-        <span>+</span>
+        +
       </button>
     </div>
   );
