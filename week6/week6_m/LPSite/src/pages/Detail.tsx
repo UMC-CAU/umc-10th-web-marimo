@@ -1,19 +1,22 @@
+import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchLPDetail, likeLP, unlikeLP, deleteLP } from '../api/lp';
+import { fetchComments, createComment, deleteComment } from '../api/comment';
 import { Loading } from '../components/Loading';
+import { CommentSkeleton } from '../components/Skeleton';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useAuthStore } from '../store/authStore';
+import { useIntersect } from '../hooks/useIntersect';
 import './Detail.css';
 
 function relativeTime(dateStr: string): string {
-  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (seconds < 60) return '방금 전';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}분 전`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}시간 전`;
-  const days = Math.floor(seconds / 86400);
-  if (days < 30) return `${days}일 전`;
-  return `${Math.floor(days / 30)}달 전`;
+  const s = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (s < 60) return '방금 전';
+  if (s < 3600) return `${Math.floor(s / 60)}분 전`;
+  if (s < 86400) return `${Math.floor(s / 3600)}시간 전`;
+  const d = Math.floor(s / 86400);
+  return d < 30 ? `${d}일 전` : `${Math.floor(d / 30)}달 전`;
 }
 
 export function Detail() {
@@ -23,6 +26,10 @@ export function Detail() {
   const { user } = useAuthStore();
   const lpIdNum = parseInt(lpid || '0', 10);
 
+  const [commentOrder, setCommentOrder] = useState<'asc' | 'desc'>('desc');
+  const [commentText, setCommentText] = useState('');
+
+  /* ── LP 상세 ── */
   const { data, isLoading, error } = useQuery({
     queryKey: ['lp', lpIdNum],
     queryFn: () => fetchLPDetail(lpIdNum),
@@ -30,23 +37,60 @@ export function Detail() {
     gcTime: 1000 * 60 * 10,
   });
 
-  const isLiked = !!data?.likes.some(like => like.userId === user?.id);
+  const isLiked = !!data?.likes.some(l => l.userId === user?.id);
   const isOwner = data?.authorId === user?.id;
 
   const likeMutation = useMutation({
-    mutationFn: () => isLiked ? unlikeLP(lpIdNum) : likeLP(lpIdNum),
+    mutationFn: () => (isLiked ? unlikeLP(lpIdNum) : likeLP(lpIdNum)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lp', lpIdNum] }),
   });
 
-  const deleteMutation = useMutation({
+  const deleteLPMutation = useMutation({
     mutationFn: () => deleteLP(lpIdNum),
     onSuccess: () => navigate('/'),
   });
 
-  const handleDelete = () => {
-    if (window.confirm('정말 삭제하시겠습니까?')) {
-      deleteMutation.mutate();
-    }
+  /* ── 댓글 (useInfiniteQuery) ── */
+  const {
+    data: commentPages,
+    isLoading: commentsLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['lpComments', lpIdNum, commentOrder],
+    queryFn: ({ pageParam }: { pageParam: number | undefined }) =>
+      fetchComments(lpIdNum, pageParam, 10, commentOrder),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: p => (p.hasNext ? p.nextCursor : undefined),
+    staleTime: 1000 * 60,
+  });
+
+  const allComments = commentPages?.pages.flatMap(p => p.data) ?? [];
+
+  const handleCommentIntersect = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const commentSentinelRef = useIntersect(handleCommentIntersect);
+
+  const createCommentMutation = useMutation({
+    mutationFn: () => createComment(lpIdNum, commentText),
+    onSuccess: () => {
+      setCommentText('');
+      queryClient.invalidateQueries({ queryKey: ['lpComments', lpIdNum] });
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId: number) => deleteComment(lpIdNum, commentId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lpComments', lpIdNum] }),
+  });
+
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+    createCommentMutation.mutate();
   };
 
   return (
@@ -63,7 +107,7 @@ export function Detail() {
 
         {data && (
           <article className="detail-container">
-            {/* 상단: 작성자 + 수정/삭제 */}
+            {/* 작성자 + 수정·삭제 */}
             <div className="detail-top">
               <div className="detail-author">
                 <div className="author-avatar">
@@ -74,7 +118,6 @@ export function Detail() {
                   <span className="detail-date">{relativeTime(data.createdAt)}</span>
                 </div>
               </div>
-
               {isOwner && (
                 <div className="detail-actions-top">
                   <button className="icon-action" title="수정">
@@ -86,14 +129,13 @@ export function Detail() {
                   <button
                     className="icon-action icon-delete"
                     title="삭제"
-                    onClick={handleDelete}
-                    disabled={deleteMutation.isPending}
+                    onClick={() => window.confirm('정말 삭제하시겠습니까?') && deleteLPMutation.mutate()}
+                    disabled={deleteLPMutation.isPending}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <polyline points="3 6 5 6 21 6" />
                       <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                      <path d="M10 11v6M14 11v6" />
-                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                      <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                     </svg>
                   </button>
                 </div>
@@ -103,7 +145,7 @@ export function Detail() {
             {/* 제목 */}
             <h1 className="detail-title">{data.title}</h1>
 
-            {/* 바이닐 레코드 이미지 */}
+            {/* 바이닐 레코드 */}
             <div className="vinyl-wrapper">
               <div className="vinyl-container">
                 <img className="vinyl-disc" src={data.thumbnail} alt={data.title} />
@@ -112,9 +154,7 @@ export function Detail() {
             </div>
 
             {/* 본문 */}
-            {data.content && (
-              <p className="detail-content">{data.content}</p>
-            )}
+            {data.content && <p className="detail-content">{data.content}</p>}
 
             {/* 태그 */}
             {data.tags.length > 0 && (
@@ -136,6 +176,80 @@ export function Detail() {
                 <span>{data.likes.length}</span>
               </button>
             </div>
+
+            {/* ── 댓글 섹션 ── */}
+            <section className="comment-section">
+              <div className="comment-section-header">
+                <h2 className="comment-title">댓글</h2>
+                <div className="sort-buttons">
+                  <button
+                    className={`sort-btn ${commentOrder === 'asc' ? 'active' : ''}`}
+                    onClick={() => setCommentOrder('asc')}
+                  >오래된순</button>
+                  <button
+                    className={`sort-btn ${commentOrder === 'desc' ? 'active' : ''}`}
+                    onClick={() => setCommentOrder('desc')}
+                  >최신순</button>
+                </div>
+              </div>
+
+              {/* 댓글 작성 */}
+              <form className="comment-form" onSubmit={handleCommentSubmit}>
+                <input
+                  className="comment-input"
+                  placeholder="댓글을 입력해주세요"
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                  maxLength={500}
+                />
+                <button
+                  type="submit"
+                  className="comment-submit"
+                  disabled={!commentText.trim() || createCommentMutation.isPending}
+                >
+                  작성
+                </button>
+              </form>
+              {commentText.trim() === '' && createCommentMutation.isError && (
+                <p className="comment-hint">댓글 내용을 입력해주세요.</p>
+              )}
+
+              {/* 초기 로딩 스켈레톤 */}
+              {commentsLoading &&
+                Array.from({ length: 5 }).map((_, i) => <CommentSkeleton key={i} />)}
+
+              {/* 댓글 목록 */}
+              {allComments.map(comment => (
+                <div key={comment.id} className="comment-item">
+                  <div className="comment-avatar">
+                    {comment.author.name[0]?.toUpperCase()}
+                  </div>
+                  <div className="comment-body">
+                    <div className="comment-meta">
+                      <span className="comment-author">{comment.author.name}</span>
+                      <span className="comment-date">{relativeTime(comment.createdAt)}</span>
+                    </div>
+                    <p className="comment-content">{comment.content}</p>
+                  </div>
+                  {comment.authorId === user?.id && (
+                    <button
+                      className="comment-delete"
+                      onClick={() => deleteCommentMutation.mutate(comment.id)}
+                      title="삭제"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              {/* 추가 로딩 스켈레톤 (하단) */}
+              {isFetchingNextPage &&
+                Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={`next-${i}`} />)}
+
+              {/* 무한 스크롤 센티넬 */}
+              <div ref={commentSentinelRef} style={{ height: 1 }} />
+            </section>
           </article>
         )}
       </div>
