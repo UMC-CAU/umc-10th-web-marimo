@@ -68,3 +68,77 @@
     z-index: 150;
   }
 }
+
+/* 탈퇴 확인 모달 */
+.withdraw-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 1rem;
+}
+
+.withdraw-modal {
+  background: #1e1e1e;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem 1.8rem;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.withdraw-msg {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.withdraw-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.withdraw-error {
+  font-size: 0.8rem;
+  color: #ff6b6b;
+}
+
+.withdraw-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.withdraw-confirm {
+  flex: 1;
+  padding: 0.65rem;
+  background: #ff3b6b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.withdraw-confirm:hover:not(:disabled) { opacity: 0.85; }
+.withdraw-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.withdraw-cancel {
+  flex: 1;
+  padding: 0.65rem;
+  background: transparent;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.withdraw-cancel:hover:not(:disabled) { border-color: #555; color: var(--text); }
+.withdraw-cancel:disabled { opacity: 0.4; cursor: not-allowed; }

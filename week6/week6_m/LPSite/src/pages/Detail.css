@@ -300,18 +300,77 @@
   word-break: break-word;
 }
 
-.comment-delete {
+/* 댓글 수정 폼 */
+.comment-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.comment-edit-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.comment-cancel {
+  padding: 0.5rem 0.9rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  transition: all 0.2s;
+}
+.comment-cancel:hover { border-color: #555; color: var(--text); }
+
+/* 댓글 메뉴 */
+.comment-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.comment-menu-btn {
   background: none;
   border: none;
-  color: #444;
-  font-size: 1.1rem;
-  line-height: 1;
-  padding: 0.2rem 0.4rem;
+  color: #555;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.4rem;
   border-radius: 4px;
-  flex-shrink: 0;
   transition: color 0.2s;
 }
-.comment-delete:hover { color: #ff6b6b; }
+.comment-menu-btn:hover { color: var(--text-muted); }
+
+.comment-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  min-width: 80px;
+  overflow: hidden;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.comment-menu-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+.comment-menu-dropdown button:hover {
+  background: #333;
+  color: var(--text);
+}
+.comment-menu-dropdown .menu-delete:hover { color: #ff6b6b; }
 
 /* ── 에러 ── */
 .detail-error {

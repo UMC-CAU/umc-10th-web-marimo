@@ -1,4 +1,8 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
+import { deleteUser } from '../api/auth';
+import { useAuthStore } from '../store/authStore';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -7,6 +11,18 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const withdrawMutation = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      logout();
+      navigate('/login');
+    },
+  });
+
   return (
     <>
       {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
@@ -30,11 +46,40 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         <div className="sidebar-bottom">
-          <button className="nav-item withdraw-btn">
+          <button className="nav-item withdraw-btn" onClick={() => setConfirmOpen(true)}>
             탈퇴하기
           </button>
         </div>
       </aside>
+
+      {/* 탈퇴 확인 모달 */}
+      {confirmOpen && (
+        <div className="withdraw-backdrop" onClick={() => setConfirmOpen(false)}>
+          <div className="withdraw-modal" onClick={e => e.stopPropagation()}>
+            <p className="withdraw-msg">정말 탈퇴하시겠습니까?</p>
+            <p className="withdraw-sub">탈퇴 시 모든 데이터가 삭제됩니다.</p>
+            {withdrawMutation.isError && (
+              <p className="withdraw-error">탈퇴 처리 중 오류가 발생했습니다.</p>
+            )}
+            <div className="withdraw-actions">
+              <button
+                className="withdraw-confirm"
+                onClick={() => withdrawMutation.mutate()}
+                disabled={withdrawMutation.isPending}
+              >
+                {withdrawMutation.isPending ? '처리 중...' : '예'}
+              </button>
+              <button
+                className="withdraw-cancel"
+                onClick={() => setConfirmOpen(false)}
+                disabled={withdrawMutation.isPending}
+              >
+                아니요
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

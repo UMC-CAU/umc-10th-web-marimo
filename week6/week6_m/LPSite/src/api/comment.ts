@@ -18,6 +18,11 @@ export const createComment = async (lpId: number, content: string): Promise<Comm
   return data;
 };
 
+export const updateComment = async (lpId: number, commentId: number, content: string): Promise<Comment> => {
+  const { data } = await apiClient.patch(`/v1/lps/${lpId}/comments/${commentId}`, { content });
+  return data;
+};
+
 export const deleteComment = async (lpId: number, commentId: number): Promise<void> => {
   await apiClient.delete(`/v1/lps/${lpId}/comments/${commentId}`);
 };
