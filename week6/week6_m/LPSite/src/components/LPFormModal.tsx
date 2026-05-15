@@ -78,7 +78,13 @@ export function LPFormModal({ onClose, editTarget }: LPFormModalProps) {
         </div>
 
         <form
-          onSubmit={(e) => { e.preventDefault(); if (!title.trim()) return; setError(''); mutation.mutate(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!title.trim()) return;
+            if (!thumbnailPreview) { setError('사진을 선택해주세요.'); return; }
+            setError('');
+            mutation.mutate();
+          }}
           className="lp-modal-form"
         >
           <div className="lp-form-field">
@@ -152,7 +158,7 @@ export function LPFormModal({ onClose, editTarget }: LPFormModalProps) {
           <button
             type="submit"
             className="lp-modal-submit"
-            disabled={!title.trim() || mutation.isPending}
+            disabled={!title.trim() || !thumbnailPreview || mutation.isPending}
           >
             {mutation.isPending
               ? (pendingFile ? '업로드 중...' : (isEdit ? '저장 중...' : '추가 중...'))

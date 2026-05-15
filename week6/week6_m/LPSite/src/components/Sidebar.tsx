@@ -21,6 +21,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       logout();
       navigate('/login');
     },
+    onError: (err: any) => {
+      console.error('[탈퇴 오류]', err?.response?.status, err?.response?.data);
+    },
   });
 
   return (
@@ -59,7 +62,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <p className="withdraw-msg">정말 탈퇴하시겠습니까?</p>
             <p className="withdraw-sub">탈퇴 시 모든 데이터가 삭제됩니다.</p>
             {withdrawMutation.isError && (
-              <p className="withdraw-error">탈퇴 처리 중 오류가 발생했습니다.</p>
+              <p className="withdraw-error">
+                {(withdrawMutation.error as any)?.response?.data?.message
+                  ?? (withdrawMutation.error as any)?.message
+                  ?? '탈퇴 처리 중 오류가 발생했습니다.'}
+              </p>
             )}
             <div className="withdraw-actions">
               <button

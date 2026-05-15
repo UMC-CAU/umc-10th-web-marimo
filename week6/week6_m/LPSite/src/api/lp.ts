@@ -1,5 +1,7 @@
-﻿import { apiClient } from './client';
+import { apiClient } from './client';
 import { type LPDetail, type LPListResponse } from '../types';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 export const fetchLPs = async (
   cursor?: number,
@@ -23,8 +25,18 @@ export const uploadFile = async (file: File): Promise<string> => {
   const { data } = await apiClient.post('/v1/uploads', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-  console.log('[uploadFile] response data:', data);
-  return (data.url ?? data.imageUrl ?? data.path ?? data) as string;
+  const rawUrl: string = data.url ?? data.imageUrl ?? data.path ?? String(data);
+  // 백엔드가 잘못된 호스트/포트로 URL을 반환할 경우 API base URL로 교체
+  try {
+    const returned = new URL(rawUrl);
+    const base = new URL(API_BASE_URL);
+    returned.protocol = base.protocol;
+    returned.hostname = base.hostname;
+    returned.port = base.port;
+    return returned.toString();
+  } catch {
+    return rawUrl;
+  }
 };
 
 export interface LPFormPayload {
@@ -36,7 +48,6 @@ export interface LPFormPayload {
 }
 
 export const createLP = async (payload: LPFormPayload) => {
-  console.log('[createLP] payload:', JSON.stringify(payload, null, 2));
   const { data } = await apiClient.post('/v1/lps', payload);
   return data;
 };

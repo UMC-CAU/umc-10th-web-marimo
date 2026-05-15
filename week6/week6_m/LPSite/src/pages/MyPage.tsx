@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { updateUser } from '../api/auth';
+import { uploadFile } from '../api/lp';
 import { useAuthStore } from '../store/authStore';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import './MyPage.css';
@@ -14,8 +15,8 @@ export function MyPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [name, setName] = useState(user?.name ?? '');
   const [bio, setBio] = useState(user?.bio ?? '');
-  const [avatar, setAvatar] = useState(user?.avatar ?? '');
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar ?? '');
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
   const [editError, setEditError] = useState('');
 
   const handleLogout = () => {
@@ -26,8 +27,8 @@ export function MyPage() {
   const openEdit = () => {
     setName(user?.name ?? '');
     setBio(user?.bio ?? '');
-    setAvatar(user?.avatar ?? '');
     setAvatarPreview(user?.avatar ?? '');
+    setPendingAvatarFile(null);
     setEditError('');
     setEditOpen(true);
   };
@@ -35,37 +36,43 @@ export function MyPage() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const result = ev.target?.result as string;
-      setAvatar(result);
-      setAvatarPreview(result);
-    };
-    reader.readAsDataURL(file);
+    setPendingAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
   };
 
   const updateMutation = useMutation({
-    mutationFn: () => updateUser({
-      name: name.trim() || undefined,
-      bio: bio || undefined,
-      avatar: avatar || undefined,
-    }),
+    mutationFn: async () => {
+      let avatarUrl: string | undefined;
+      if (pendingAvatarFile) {
+        avatarUrl = await uploadFile(pendingAvatarFile);
+      }
+      return updateUser({
+        name: name.trim(),
+        bio: bio,           // 빈 문자열도 그대로 전송 (optional 필드)
+        avatar: avatarUrl,  // 파일 선택 시에만 포함
+      });
+    },
     onSuccess: (data) => {
-      setUser({ ...user!, name: data.name ?? name, bio: data.bio ?? bio, avatar: data.avatar ?? avatar });
+      setUser({
+        ...user!,
+        name: data.name ?? name,
+        bio: data.bio ?? bio,
+        avatar: data.avatar ?? (pendingAvatarFile ? avatarPreview : user?.avatar),
+      });
       setEditOpen(false);
     },
-    onError: () => {
-      setEditError('프로필 수정에 실패했습니다.');
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? err?.message ?? '알 수 없는 오류';
+      setEditError(`프로필 수정 실패: ${msg}`);
     },
   });
-
 
   return (
     <ProtectedRoute>
       <div className="mypage">
         <div className="mypage-card">
-          {avatarPreview && !editOpen ? (
-            <img src={user?.avatar ?? ''} alt="프로필" className="mypage-avatar-img" />
+          {user?.avatar ? (
+            <img src={user.avatar} alt="프로필" className="mypage-avatar-img" />
           ) : (
             <div className="mypage-avatar">
               {user?.name?.[0]?.toUpperCase() ?? '?'}
@@ -98,8 +105,11 @@ export function MyPage() {
               <button className="profile-modal-close" onClick={() => setEditOpen(false)}>×</button>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); setEditError(''); updateMutation.mutate(); }} className="profile-modal-form">
-              {/* 프로필 사진 */}
+            <form
+              onSubmit={(e) => { e.preventDefault(); setEditError(''); updateMutation.mutate(); }}
+              className="profile-modal-form"
+            >
+              {/* 프로필 사진 (선택) */}
               <div className="profile-form-field">
                 <label>프로필 사진 (선택)</label>
                 <div className="profile-file-drop" onClick={() => fileRef.current?.click()}>
@@ -128,7 +138,7 @@ export function MyPage() {
                 />
               </div>
 
-              {/* Bio */}
+              {/* Bio (선택) */}
               <div className="profile-form-field">
                 <label>Bio (선택)</label>
                 <textarea

@@ -57,8 +57,8 @@ export function Detail() {
     gcTime: 1000 * 60 * 10,
   });
 
-  const isLiked = !!data?.likes.some(l => l.userId === user?.id);
-  const isOwner = data?.authorId === user?.id;
+  const isLiked = !!data?.likes.some(l => Number(l.userId) === Number(user?.id));
+  const isOwner = !!data && !!user && Number(data.author?.id ?? data.authorId) === Number(user.id);
 
   const likeMutation = useMutation({
     mutationFn: () => (isLiked ? unlikeLP(lpIdNum) : likeLP(lpIdNum)),
@@ -117,7 +117,7 @@ export function Detail() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lpComments', lpIdNum] }),
   });
 
-  const handleCommentSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCommentSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault();
     if (!commentText.trim()) return;
     createCommentMutation.mutate();
@@ -129,7 +129,7 @@ export function Detail() {
     setMenuCommentId(null);
   };
 
-  const submitEditComment = (e: React.FormEvent<HTMLFormElement>, commentId: number) => {
+  const submitEditComment = (e: { preventDefault(): void }, commentId: number) => {
     e.preventDefault();
     if (!editCommentText.trim()) return;
     updateCommentMutation.mutate({ commentId, content: editCommentText });
@@ -312,7 +312,7 @@ export function Detail() {
                   </div>
 
                   {/* 본인 댓글 메뉴 */}
-                  {comment.authorId === user?.id && editingCommentId !== comment.id && (
+                  {Number(comment.authorId) === Number(user?.id) && editingCommentId !== comment.id && (
                     <div className="comment-menu-wrap" ref={menuCommentId === comment.id ? menuRef : null}>
                       <button
                         className="comment-menu-btn"

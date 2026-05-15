@@ -36,17 +36,17 @@ export const logoutAPI = async (): Promise<void> => {
 };
 
 export const getMyProfile = async () => {
-  const { data } = await apiClient.get('/v1/users/me');
+  const { data } = await apiClient.get('/v1/users');
   return data;
 };
 
 export const updateUser = async (payload: { name?: string; bio?: string; avatar?: string }) => {
-  const { data } = await apiClient.patch('/v1/users/me', payload);
+  const { data } = await apiClient.patch('/v1/users', payload);
   return data;
 };
 
 export const deleteUser = async (): Promise<void> => {
-  await apiClient.delete('/v1/users/me');
+  await apiClient.delete('/v1/users');
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
   localStorage.removeItem('user');
