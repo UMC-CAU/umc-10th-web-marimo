@@ -2,27 +2,22 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { signup } from '../api/auth';
-import { useAuthStore } from '../store/authStore';
 import './Auth.css';
 
 export function Signup() {
   const navigate = useNavigate();
-  const { setUser, setAuthenticated } = useAuthStore();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    nickname: '',
+    name: '',
     passwordConfirm: '',
   });
   const [error, setError] = useState('');
 
   const mutation = useMutation({
-    mutationFn: ({ email, password, nickname }: any) =>
-      signup({ email, password, nickname }),
-    onSuccess: (data) => {
-      setUser(data.user);
-      setAuthenticated(true);
-      navigate('/');
+    mutationFn: () => signup({ email: formData.email, password: formData.password, name: formData.name }),
+    onSuccess: () => {
+      navigate('/login');
     },
     onError: (error: any) => {
       setError(error.response?.data?.message || '회원가입에 실패했습니다.');
@@ -33,7 +28,7 @@ export function Signup() {
     e.preventDefault();
     setError('');
 
-    if (!formData.email || !formData.password || !formData.nickname || !formData.passwordConfirm) {
+    if (!formData.email || !formData.password || !formData.name || !formData.passwordConfirm) {
       setError('모든 필드를 입력해주세요.');
       return;
     }
@@ -48,11 +43,7 @@ export function Signup() {
       return;
     }
 
-    mutation.mutate({
-      email: formData.email,
-      password: formData.password,
-      nickname: formData.nickname,
-    });
+    mutation.mutate();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,12 +75,12 @@ export function Signup() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="nickname">닉네임</label>
+            <label htmlFor="name">닉네임</label>
             <input
-              id="nickname"
+              id="name"
               type="text"
-              name="nickname"
-              value={formData.nickname}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               placeholder="닉네임을 입력해주세요"
               required

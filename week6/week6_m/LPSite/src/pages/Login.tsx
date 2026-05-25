@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { login } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
@@ -7,6 +7,9 @@ import './Auth.css';
 
 export function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string })?.from ?? '/';
+
   const { setUser, setAuthenticated } = useAuthStore();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -14,9 +17,9 @@ export function Login() {
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      setUser(data.user);
+      setUser({ id: data.id, name: data.name });
       setAuthenticated(true);
-      navigate('/');
+      navigate(from, { replace: true });
     },
     onError: (error: any) => {
       setError(error.response?.data?.message || '로그인에 실패했습니다.');
@@ -34,51 +37,34 @@ export function Login() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
         <h1>🎨 Moim에 로그인</h1>
-        
+
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">이메일</label>
             <input
-              id="email"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="example@email.com"
-              required
+              id="email" type="email" name="email"
+              value={formData.email} onChange={handleChange}
+              placeholder="example@email.com" required
             />
           </div>
-
           <div className="form-group">
             <label htmlFor="password">비밀번호</label>
             <input
-              id="password"
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="비밀번호를 입력해주세요"
-              required
+              id="password" type="password" name="password"
+              value={formData.password} onChange={handleChange}
+              placeholder="비밀번호를 입력해주세요" required
             />
           </div>
-
-          <button
-            type="submit"
-            className="submit-btn"
-            disabled={mutation.isPending}
-          >
+          <button type="submit" className="submit-btn" disabled={mutation.isPending}>
             {mutation.isPending ? '로그인 중...' : '로그인'}
           </button>
         </form>

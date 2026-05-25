@@ -1,40 +1,68 @@
-// LP (Landing Page) 타입
+export interface Tag {
+  id: number;
+  name: string;
+}
+
+export interface Like {
+  id: number;
+  userId: number;
+  lpId: number;
+}
+
 export interface LP {
   id: number;
   title: string;
-  description: string;
+  content: string;
   thumbnail: string;
+  published: boolean;
+  authorId: number;
   createdAt: string;
-  likes: number;
-  userId: number;
+  updatedAt: string;
+  tags: Tag[];
+  likes: Like[];
 }
 
 export interface LPDetail extends LP {
-  content: string;
-  images: string[];
+  author: {
+    id: number;
+    name: string;
+    email: string;
+    bio: string | null;
+    avatar: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 export interface LPListResponse {
   data: LP[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-  };
+  nextCursor: number;
+  hasNext: boolean;
 }
 
-// 사용자 타입
 export interface User {
   id: number;
-  email: string;
-  nickname: string;
-  profileImage?: string;
+  name: string;
+  email?: string;
+  bio?: string | null;
+  avatar?: string | null;
 }
 
-export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
-  user: User;
+export interface SignInData {
+  id: number;
+  name: string;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface SignUpData {
+  id: number;
+  name: string;
+  email: string;
+  bio: string | null;
+  avatar: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LoginRequest {
@@ -43,7 +71,33 @@ export interface LoginRequest {
 }
 
 export interface SignupRequest {
+  name: string;
   email: string;
   password: string;
-  nickname: string;
+}
+
+export interface CommentAuthor {
+  id: number;
+  name: string;
+  email: string;
+  bio: string | null;
+  avatar: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Comment {
+  id: number;
+  content: string;
+  lpId: number;
+  authorId: number;
+  createdAt: string;
+  updatedAt: string;
+  author: CommentAuthor;
+}
+
+export interface CommentListResponse {
+  data: Comment[];
+  nextCursor: number;
+  hasNext: boolean;
 }
