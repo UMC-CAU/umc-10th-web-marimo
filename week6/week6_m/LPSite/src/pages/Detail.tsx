@@ -1,11 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchLPDetail, likeLP, unlikeLP, deleteLP } from '../api/lp';
-import { fetchComments, createComment, deleteComment } from '../api/comment';
+import { fetchComments, createComment, updateComment, deleteComment } from '../api/comment';
 import { Loading } from '../components/Loading';
 import { CommentSkeleton } from '../components/Skeleton';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { LPFormModal } from '../components/LPFormModal';
 import { useAuthStore } from '../store/authStore';
 import { useIntersect } from '../hooks/useIntersect';
 import './Detail.css';
@@ -28,6 +29,25 @@ export function Detail() {
 
   const [commentOrder, setCommentOrder] = useState<'asc' | 'desc'>('desc');
   const [commentText, setCommentText] = useState('');
+  const [editLPOpen, setEditLPOpen] = useState(false);
+
+  /* 댓글 수정 상태 */
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editCommentText, setEditCommentText] = useState('');
+  /* 댓글 메뉴 오픈 상태 */
+  const [menuCommentId, setMenuCommentId] = useState<number | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  /* 메뉴 외부 클릭 시 닫기 */
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuCommentId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   /* ── LP 상세 ── */
   const { data, isLoading, error } = useQuery({
@@ -37,8 +57,8 @@ export function Detail() {
     gcTime: 1000 * 60 * 10,
   });
 
-  const isLiked = !!data?.likes.some(l => l.userId === user?.id);
-  const isOwner = data?.authorId === user?.id;
+  const isLiked = !!data?.likes.some(l => Number(l.userId) === Number(user?.id));
+  const isOwner = !!data && !!user && Number(data.author?.id ?? data.authorId) === Number(user.id);
 
   const likeMutation = useMutation({
     mutationFn: () => (isLiked ? unlikeLP(lpIdNum) : likeLP(lpIdNum)),
@@ -82,15 +102,37 @@ export function Detail() {
     },
   });
 
+  const updateCommentMutation = useMutation({
+    mutationFn: ({ commentId, content }: { commentId: number; content: string }) =>
+      updateComment(lpIdNum, commentId, content),
+    onSuccess: () => {
+      setEditingCommentId(null);
+      setEditCommentText('');
+      queryClient.invalidateQueries({ queryKey: ['lpComments', lpIdNum] });
+    },
+  });
+
   const deleteCommentMutation = useMutation({
     mutationFn: (commentId: number) => deleteComment(lpIdNum, commentId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lpComments', lpIdNum] }),
   });
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault();
     if (!commentText.trim()) return;
     createCommentMutation.mutate();
+  };
+
+  const startEditComment = (commentId: number, currentContent: string) => {
+    setEditingCommentId(commentId);
+    setEditCommentText(currentContent);
+    setMenuCommentId(null);
+  };
+
+  const submitEditComment = (e: { preventDefault(): void }, commentId: number) => {
+    e.preventDefault();
+    if (!editCommentText.trim()) return;
+    updateCommentMutation.mutate({ commentId, content: editCommentText });
   };
 
   return (
@@ -120,7 +162,11 @@ export function Detail() {
               </div>
               {isOwner && (
                 <div className="detail-actions-top">
-                  <button className="icon-action" title="수정">
+                  <button
+                    className="icon-action"
+                    title="수정"
+                    onClick={() => setEditLPOpen(true)}
+                  >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -229,21 +275,72 @@ export function Detail() {
                       <span className="comment-author">{comment.author.name}</span>
                       <span className="comment-date">{relativeTime(comment.createdAt)}</span>
                     </div>
-                    <p className="comment-content">{comment.content}</p>
+
+                    {/* 수정 모드 */}
+                    {editingCommentId === comment.id ? (
+                      <form
+                        className="comment-edit-form"
+                        onSubmit={e => submitEditComment(e, comment.id)}
+                      >
+                        <input
+                          className="comment-input"
+                          value={editCommentText}
+                          onChange={e => setEditCommentText(e.target.value)}
+                          maxLength={500}
+                          autoFocus
+                        />
+                        <div className="comment-edit-actions">
+                          <button
+                            type="submit"
+                            className="comment-submit"
+                            disabled={!editCommentText.trim() || updateCommentMutation.isPending}
+                          >
+                            저장
+                          </button>
+                          <button
+                            type="button"
+                            className="comment-cancel"
+                            onClick={() => setEditingCommentId(null)}
+                          >
+                            취소
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <p className="comment-content">{comment.content}</p>
+                    )}
                   </div>
-                  {comment.authorId === user?.id && (
-                    <button
-                      className="comment-delete"
-                      onClick={() => deleteCommentMutation.mutate(comment.id)}
-                      title="삭제"
-                    >
-                      ×
-                    </button>
+
+                  {/* 본인 댓글 메뉴 */}
+                  {Number(comment.authorId) === Number(user?.id) && editingCommentId !== comment.id && (
+                    <div className="comment-menu-wrap" ref={menuCommentId === comment.id ? menuRef : null}>
+                      <button
+                        className="comment-menu-btn"
+                        onClick={() => setMenuCommentId(prev => prev === comment.id ? null : comment.id)}
+                        aria-label="댓글 메뉴"
+                      >
+                        •••
+                      </button>
+                      {menuCommentId === comment.id && (
+                        <div className="comment-menu-dropdown">
+                          <button onClick={() => startEditComment(comment.id, comment.content)}>수정</button>
+                          <button
+                            className="menu-delete"
+                            onClick={() => {
+                              setMenuCommentId(null);
+                              deleteCommentMutation.mutate(comment.id);
+                            }}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
 
-              {/* 추가 로딩 스켈레톤 (하단) */}
+              {/* 추가 로딩 스켈레톤 */}
               {isFetchingNextPage &&
                 Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={`next-${i}`} />)}
 
@@ -253,6 +350,14 @@ export function Detail() {
           </article>
         )}
       </div>
+
+      {/* LP 수정 모달 */}
+      {editLPOpen && data && (
+        <LPFormModal
+          editTarget={data}
+          onClose={() => setEditLPOpen(false)}
+        />
+      )}
     </ProtectedRoute>
   );
 }
