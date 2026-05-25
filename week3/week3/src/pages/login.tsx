@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import LoginForm from '../components/login/LoginForm';
@@ -27,14 +28,37 @@ const LoginPage = () => {
     navigate(-1);
   };
 
-  const onSubmit = (values: LoginFormValues) => {
-    setAuthSession({
-      email: values.email,
-      nickname: values.email.split('@')[0],
-      token: `mock-token-${Date.now()}`,
-    });
+  // ⭐️ 핵심: 실제 API 호출을 하는 onSubmit 하나만 컴포넌트 '내부'에 둡니다.
+  const onSubmit = async (values: LoginFormValues) => {
+    try {
+      // 1. 실제 백엔드로 로그인 요청
+      const response = await axios.post('http://localhost:8000/v1/auth/signin', {
+        email: values.email,
+        password: values.password,
+      });
 
-    navigate('/');
+      console.log('로그인 성공:', response.data);
+
+      // 2. 응답받은 실제 토큰 2개를 저장
+      const { accessToken, refreshToken, nickname } = response.data;
+      
+      // ProtectedRoute가 확인할 수 있도록 localStorage에 명확히 저장
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+
+      setAuthSession({
+        email: values.email,
+        nickname: nickname || values.email.split('@')[0],
+        token: accessToken,
+      });
+
+      // 3. 메인 페이지로 이동
+      navigate('/');
+      
+    } catch (error) {
+      console.error('로그인 실패:', error);
+      alert('로그인에 실패했습니다. 백엔드 서버가 켜져 있는지, 이메일/비밀번호가 맞는지 확인해주세요.');
+    }
   };
 
   return (

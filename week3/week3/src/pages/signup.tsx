@@ -8,6 +8,7 @@ import SignupNicknameForm from '../components/signup/SignupNicknameForm';
 import { signupSchema } from '../schemas/auth';
 import type { AuthSession, SignupFormValues } from '../types/auth';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import axios from 'axios';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -56,14 +57,25 @@ const SignupPage = () => {
     });
   };
 
-  const handleNicknameSubmit = (values: SignupFormValues) => {
-    setAuthSession({
-      email: values.email,
-      nickname: values.nickname,
-      token: `mock-token-${Date.now()}`,
-    });
+  const handleNicknameSubmit = async(values: SignupFormValues) => {
+    try {
+      // 백엔드로 실제 회원가입 요청 보내기 (Swagger 주소인 /v1/auth/signup 사용)
+      const response = await axios.post('http://localhost:8000/v1/auth/signup', {
+        name: values.nickname,
+        email: values.email,
+        password: values.password// ⚠️ 백엔드 규칙에 따라 이름이 다를 수 있음
+      });
 
-    navigate('/');
+      console.log("회원가입 성공! 백엔드 응답:", response.data);
+      alert("회원가입이 완료되었습니다! 이제 로그인해 주세요.");
+      
+      // 회원가입 성공 시 로그인 페이지로 바로 이동
+      navigate('/login');
+      
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+      alert("회원가입에 실패했습니다. 이메일이 중복되었는지 확인해 주세요.");
+    }
   };
 
   return (

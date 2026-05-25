@@ -15,6 +15,9 @@ const LoginForm = ({
   onSubmit,
   onBack,
 }: LoginFormProps) => {
+  const handleGoogleLogin = () => {
+    window.location.href = 'http://localhost:8000/v1/auth/google/login';
+  };
   return (
     <div className="relative w-full max-w-md rounded-[2rem] border border-white/10 bg-white/10 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
       <button
@@ -81,6 +84,27 @@ const LoginForm = ({
           로그인
         </button>
       </form>
+
+      {/* ⭐️ 소셜 로그인 구분선 및 구글 로그인 버튼 추가 */}
+      <div className="mt-6 flex items-center justify-center space-x-2">
+        <span className="h-px w-full bg-white/20"></span>
+        <span className="text-sm text-slate-400">OR</span>
+        <span className="h-px w-full bg-white/20"></span>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        className="mt-6 w-full flex items-center justify-center gap-3 rounded-2xl bg-white px-4 py-3 font-bold text-slate-900 transition hover:bg-slate-200"
+      >
+        <img 
+          src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
+          alt="Google Logo" 
+          className="w-5 h-5" 
+        />
+        구글 계정으로 로그인
+      </button>
+      
     </div>
   );
 };
