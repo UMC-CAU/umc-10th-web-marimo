@@ -48,20 +48,33 @@ export function MyPage() {
       }
       return updateUser({
         name: name.trim(),
-        bio: bio,           // 빈 문자열도 그대로 전송 (optional 필드)
-        avatar: avatarUrl,  // 파일 선택 시에만 포함
+        bio: bio,
+        avatar: avatarUrl,
       });
+    },
+    onMutate: () => {
+      const previousUser = user ? { ...user } : null;
+      setUser({
+        ...user!,
+        name: name.trim(),
+        bio: bio,
+        avatar: pendingAvatarFile ? avatarPreview : user?.avatar,
+      });
+      return { previousUser };
     },
     onSuccess: (data) => {
       setUser({
         ...user!,
-        name: data.name ?? name,
+        name: data.name ?? name.trim(),
         bio: data.bio ?? bio,
         avatar: data.avatar ?? (pendingAvatarFile ? avatarPreview : user?.avatar),
       });
       setEditOpen(false);
     },
-    onError: (err: any) => {
+    onError: (err: any, _vars, context) => {
+      if (context?.previousUser) {
+        setUser(context.previousUser);
+      }
       const msg = err?.response?.data?.message ?? err?.message ?? '알 수 없는 오류';
       setEditError(`프로필 수정 실패: ${msg}`);
     },
