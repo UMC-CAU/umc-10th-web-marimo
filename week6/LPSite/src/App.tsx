@@ -8,6 +8,7 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { NotFound } from './pages/NotFound';
 import './App.css';
+import Cart from './pages/Cart';
 
 function App() {
   return (
@@ -44,6 +45,14 @@ function App() {
           element={
             <Layout>
               <Practice />
+            </Layout>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <Layout>
+              <Cart />
             </Layout>
           }
         />
