@@ -2,19 +2,26 @@ import { useSelector, useDispatch } from 'react-redux'
 import { type RootState }  from '../store/store.ts'
 import { clearCart, removeItem, increase, decrease, calculateTotal } from '../store/slices/cartSlice.ts'
 import { useEffect } from 'react'
+import Modal from '../components/Modal.tsx'
+import { openModal } from '../store/modal/modalSlice.ts'
 
 export default function Cart() {
   const dispatch = useDispatch()
   const { cartItems, amount, total } = useSelector(
-    (state: RootState) => state.cart  
+    (state: RootState) => state.cart
   )
+  const { isOpen } = useSelector(
+    (state: RootState) => state.modal
+  )
+  
   useEffect(() => {
         dispatch(calculateTotal())
     }, [cartItems])
 
   return (
     <div className="p-8">
-        <button onClick={() => dispatch(clearCart())} className="mb-4 px-4 py-2 bg-gray-350 font-bold text-pink-500 rounded">
+        {isOpen && <Modal/>}
+        <button onClick={() => dispatch(openModal())} className="mb-4 px-4 py-2 bg-gray-350 font-bold text-pink-500 rounded">
         전체 삭제
         </button>
     {cartItems.map((item) => (
