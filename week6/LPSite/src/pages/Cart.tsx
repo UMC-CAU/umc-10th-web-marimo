@@ -1,27 +1,20 @@
-import { useSelector, useDispatch } from 'react-redux'
-import { type RootState }  from '../store/store.ts'
-import { clearCart, removeItem, increase, decrease, calculateTotal } from '../store/slices/cartSlice.ts'
-import { useEffect } from 'react'
-import Modal from '../components/Modal.tsx'
-import { openModal } from '../store/modal/modalSlice.ts'
+import useCartStore from '../store/useCartStore.ts';
+import useModalStore from '../store/useModalStore.ts';
+import Modal from '../components/Modal.tsx';
+import { useEffect } from 'react';
 
 export default function Cart() {
-  const dispatch = useDispatch()
-  const { cartItems, amount, total } = useSelector(
-    (state: RootState) => state.cart
-  )
-  const { isOpen } = useSelector(
-    (state: RootState) => state.modal
-  )
-  
-  useEffect(() => {
-        dispatch(calculateTotal())
-    }, [cartItems])
+  const { cartItems, amount, total, decrease, increase, removeItem, calculateTotal } = useCartStore();
+  const { isOpen, openModal } = useModalStore();
+
+    useEffect(() => {
+        calculateTotal();
+    }, [cartItems]);
 
   return (
     <div className="p-8">
         {isOpen && <Modal/>}
-        <button onClick={() => dispatch(openModal())} className="mb-4 px-4 py-2 bg-gray-350 font-bold text-pink-500 rounded">
+        <button onClick={() => openModal()} className="mb-4 px-4 py-2 bg-gray-350 font-bold text-pink-500 rounded">
         전체 삭제
         </button>
     {cartItems.map((item) => (
@@ -40,10 +33,10 @@ export default function Cart() {
 
     {/* 오른쪽: - 수량 + 삭제 */}
     <div className="flex items-center gap-2">
-        <button onClick={() => dispatch(decrease(item.id))} className="w-7 h-7 bg-gray-500 text-white rounded font-bold">-</button>
+        <button onClick={() => decrease(item.id)} className="w-7 h-7 bg-gray-500 text-white rounded font-bold">-</button>
         <span>{item.amount}</span>
-        <button onClick={() => dispatch(increase(item.id))} className="w-7 h-7 bg-gray-500 text-white rounded font-bold">+</button>
-        <button onClick={() => dispatch(removeItem(item.id))} className="w-9 h-7 bg-pink-500 text-black rounded text-sm font-bold">삭제</button>
+        <button onClick={() => increase(item.id)} className="w-7 h-7 bg-gray-500 text-white rounded font-bold">+</button>
+        <button onClick={() => removeItem(item.id)} className="w-9 h-7 bg-pink-500 text-black rounded text-sm font-bold">삭제</button>
         </div>
     </div>
 
