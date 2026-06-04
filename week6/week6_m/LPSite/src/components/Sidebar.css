@@ -1,17 +1,47 @@
+/* ─── Sidebar (position: fixed, 항상 DOM에 존재) ─── */
 .sidebar {
+  position: fixed;
+  left: 0;
+  top: var(--header-height);
   width: var(--sidebar-width);
+  height: calc(100vh - var(--header-height));
   background: var(--bg);
   border-right: 1px solid var(--border);
-  min-height: calc(100vh - var(--header-height));
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  z-index: 200;
+
+  /* 닫힘 상태: 왼쪽으로 숨김 */
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 열림 상태: 제자리로 슬라이드인 */
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* ─── 딤드 오버레이 (항상 DOM에 존재, 투명도로 제어) ─── */
 .sidebar-overlay {
-  display: none;
+  position: fixed;
+  inset: 0;
+  top: var(--header-height);
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 150;
+
+  /* 닫힘 상태: 투명 + 클릭 불가 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
 }
 
+/* 열림 상태: 페이드인 + 클릭 가능 */
+.sidebar-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── 네비게이션 ─── */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -35,7 +65,10 @@
   width: 100%;
   cursor: pointer;
 }
-.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-item:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
 
 .sidebar-bottom {
   margin-top: auto;
@@ -46,30 +79,12 @@
   font-size: 0.65rem;
   color: #555;
 }
-.withdraw-btn:hover { color: #ff6b6b; background: rgba(255,107,107,0.06); }
-
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    left: calc(-1 * var(--sidebar-width));
-    top: var(--header-height);
-    height: calc(100vh - var(--header-height));
-    transition: left 0.25s ease;
-    z-index: 200;
-  }
-  .sidebar.open { left: 0; }
-
-  .sidebar-overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    top: var(--header-height);
-    background: rgba(0,0,0,0.6);
-    z-index: 150;
-  }
+.withdraw-btn:hover {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.06);
 }
 
-/* 탈퇴 확인 모달 */
+/* ─── 탈퇴 확인 모달 ─── */
 .withdraw-backdrop {
   position: fixed;
   inset: 0;
@@ -127,8 +142,13 @@
   font-weight: 600;
   transition: opacity 0.2s;
 }
-.withdraw-confirm:hover:not(:disabled) { opacity: 0.85; }
-.withdraw-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+.withdraw-confirm:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.withdraw-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .withdraw-cancel {
   flex: 1;
@@ -140,5 +160,11 @@
   font-size: 0.9rem;
   transition: all 0.2s;
 }
-.withdraw-cancel:hover:not(:disabled) { border-color: #555; color: var(--text); }
-.withdraw-cancel:disabled { opacity: 0.4; cursor: not-allowed; }
+.withdraw-cancel:hover:not(:disabled) {
+  border-color: #555;
+  color: var(--text);
+}
+.withdraw-cancel:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
