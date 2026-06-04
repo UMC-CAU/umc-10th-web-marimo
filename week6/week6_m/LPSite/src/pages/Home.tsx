@@ -1,14 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { fetchLPs } from '../api/lp';
 import { Card } from '../components/Card';
 import { CardSkeleton } from '../components/Skeleton';
 import { useIntersect } from '../hooks/useIntersect';
+import { useThrottle } from '../hooks/useThrottle';
 import './Home.css';
 
 const LIMIT = 18;
 const SKELETON_COUNT = LIMIT;
+// 스크롤 이벤트를 1초에 한 번만 처리 (너무 빠른 연속 요청 방지)
+const THROTTLE_INTERVAL = 1000;
 
 export function Home() {
   const navigate = useNavigate();
@@ -39,9 +42,28 @@ export function Home() {
     setOrder(newOrder);
   };
 
+  // 교차 감지 이벤트를 카운터로 변환 → useThrottle로 throttle
+  const [intersectTick, setIntersectTick] = useState(0);
+  const throttledTick = useThrottle(intersectTick, THROTTLE_INTERVAL);
+
+  // stale closure 없이 항상 최신 값을 읽기 위한 ref
+  const latestRef = useRef({ hasNextPage, isFetchingNextPage, fetchNextPage });
+  latestRef.current = { hasNextPage, isFetchingNextPage, fetchNextPage };
+
   const handleIntersect = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    setIntersectTick(t => t + 1);
+  }, []);
+
+  // throttledTick이 바뀔 때만 실행 → 1초에 한 번만 fetchNextPage 호출
+  useEffect(() => {
+    if (throttledTick === 0) return;
+    const { hasNextPage: has, isFetchingNextPage: fetching, fetchNextPage: doFetch } =
+      latestRef.current;
+    if (has && !fetching) {
+      console.log(`[Throttle] fetchNextPage 호출 (tick: ${throttledTick})`);
+      doFetch();
+    }
+  }, [throttledTick]);
 
   const sentinelRef = useIntersect(handleIntersect);
 
@@ -70,25 +92,21 @@ export function Home() {
       )}
 
       <div className="card-grid">
-        {/* 초기 로딩: 스켈레톤 전체 표시 */}
         {isLoading &&
           Array.from({ length: SKELETON_COUNT }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
 
-        {/* 로드된 카드 */}
         {allLPs.map(lp => (
           <Card key={lp.id} lp={lp} onClick={id => navigate(`/lp/${id}`)} />
         ))}
 
-        {/* 추가 로딩: 스켈레톤 하단 표시 */}
         {isFetchingNextPage &&
           Array.from({ length: 6 }).map((_, i) => (
             <CardSkeleton key={`next-${i}`} />
           ))}
       </div>
 
-      {/* 무한 스크롤 센티넬 */}
       <div ref={sentinelRef} style={{ height: 1 }} />
     </div>
   );
