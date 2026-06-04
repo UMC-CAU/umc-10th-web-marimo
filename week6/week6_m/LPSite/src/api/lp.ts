@@ -6,10 +6,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 export const fetchLPs = async (
   cursor?: number,
   limit: number = 12,
-  order: 'asc' | 'desc' = 'desc'
+  order: 'asc' | 'desc' = 'desc',
+  search?: string
 ): Promise<LPListResponse> => {
   const { data } = await apiClient.get('/v1/lps', {
-    params: { cursor, limit, order },
+    params: { cursor, limit, order, search: search || undefined },
   });
   return data;
 };

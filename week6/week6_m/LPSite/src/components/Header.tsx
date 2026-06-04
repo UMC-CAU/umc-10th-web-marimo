@@ -38,7 +38,7 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       <nav className="header-nav">
-        <button className="icon-btn" aria-label="검색">
+        <button className="icon-btn" aria-label="검색" onClick={() => navigate('/search')}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
