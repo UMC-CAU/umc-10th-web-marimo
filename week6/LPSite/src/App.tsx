@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { Detail } from './pages/Detail';
 import { MyPage } from './pages/MyPage';
 import { Practice } from './pages/Practice';
+import { Search } from './pages/Search';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { NotFound } from './pages/NotFound';
@@ -53,6 +54,14 @@ function App() {
           element={
             <Layout>
               <Cart />
+            </Layout>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <Layout>
+              <Search />
             </Layout>
           }
         />

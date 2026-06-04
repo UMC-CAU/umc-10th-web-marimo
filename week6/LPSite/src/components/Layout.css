@@ -4,14 +4,9 @@
   min-height: 100vh;
 }
 
-.layout-container {
-  display: flex;
-  flex: 1;
-}
-
+/* Sidebar는 position: fixed이므로 레이아웃 흐름에서 제외됨 */
 .main-content {
   flex: 1;
-  min-width: 0;
   background: var(--bg);
   padding: 1.5rem;
 }
